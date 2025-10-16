@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // Reset activity select (keep placeholder)
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -20,11 +23,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Build participants HTML
+        let participantsHTML = "";
+        const participants = details.participants || [];
+
+        if (participants.length === 0) {
+          participantsHTML = `<p class="participants-empty">No participants yet</p>`;
+        } else {
+          participantsHTML = `<ul class="participants">`;
+          participants.forEach((email) => {
+            const local = String(email).split("@")[0] || email;
+            const initials = local
+              .split(/[\.\-_ ]+/)
+              .map((s) => (s ? s[0].toUpperCase() : ""))
+              .join("")
+              .slice(0, 2);
+            const displayName = local;
+            participantsHTML += `
+              <li class="participant-item">
+                <span class="participant-badge">${initials}</span>
+                ${displayName}
+              </li>
+            `;
+          });
+          participantsHTML += `</ul>`;
+        }
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <h4 style="margin:10px 0 6px 0; font-size:14px; color:#1a237e;">Participants</h4>
+            ${participantsHTML}
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
